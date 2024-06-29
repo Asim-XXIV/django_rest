@@ -2,8 +2,10 @@ from django.db import models
 from login.models import User
 import uuid
 
+
 class Category(models.Model):
     name = models.CharField(max_length=255)
+
 
 class Advertisement(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -22,9 +24,12 @@ class Advertisement(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     terminate = models.DateField()
 
+
+
 class UserWallet(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+
 
 class UserTransaction(models.Model):
     TRANSACTION_TYPES = [
@@ -45,3 +50,4 @@ class UserTransaction(models.Model):
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     date = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=10, choices=TRANSACTION_STATUS, default='pending')
+    proof = models.TextField(null=True, blank=True)
