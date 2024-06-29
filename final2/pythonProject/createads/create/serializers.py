@@ -5,6 +5,7 @@ from django.contrib.auth.models import AbstractUser
 
 class AdvertisementSerializer(serializers.ModelSerializer):
     category_name = serializers.CharField(write_only=True, required=False)
+    budget = serializers.DecimalField(max_digits=10, decimal_places=2, required=False)
 
     class Meta:
         model = Advertisement
@@ -18,9 +19,7 @@ class AdvertisementSerializer(serializers.ModelSerializer):
         else:
             category, created = Category.objects.get_or_create(name='default')
         validated_data['category'] = category
-        validated_data['remaining_budget'] = validated_data['budget']
         return super().create(validated_data)
-
 
 class UserWalletSerializer(serializers.ModelSerializer):
     class Meta:

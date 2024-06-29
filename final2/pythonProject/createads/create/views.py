@@ -1,3 +1,5 @@
+from datetime import timedelta, datetime
+from django.utils.timezone import now
 from django.db import transaction
 from rest_framework import generics, status, permissions
 from rest_framework.response import Response
@@ -5,7 +7,6 @@ from rest_framework.views import APIView
 from .models import Advertisement, UserWallet, UserTransaction, Category
 from .serializers import AdvertisementSerializer, UserWalletSerializer, UserTransactionSerializer, \
     CategorySerializer, AddBalanceSerializer
-from login.models import User
 
 
 class AdvertisementListView(generics.ListAPIView):
@@ -20,6 +21,24 @@ class AdvertisementCreateView(APIView):
     def post(self, request):
         data = request.data.copy()
         data['user'] = request.user.pk  # Use pk which is a more generic way to get the primary key
+
+        # Calculate budget or termination based on the limit choice
+        limit = data.get('limit')
+        if limit == 'jobs':
+            data['terminate'] = (datetime.now().date() + timedelta(days=60)).isoformat()
+            if 'budget' not in data:
+                data['budget'] = float(data['per_job']) * 20  # Assuming a default number of 20 jobs if not provided
+        elif limit == 'days':
+            terminate = data.get('terminate')
+            if terminate:
+                terminate_date = datetime.strptime(terminate, '%Y-%m-%d').date()  # Convert string to datetime.date
+                days = (terminate_date - datetime.now().date()).days
+                data['budget'] = days * float(data['per_job'])
+            else:
+                return Response({"detail": "Termination date must be provided for days limit."},
+                                status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response({"detail": "Invalid limit choice."}, status=status.HTTP_400_BAD_REQUEST)
 
         serializer = AdvertisementSerializer(data=data)
         if serializer.is_valid():
@@ -54,7 +73,6 @@ class AdvertisementCreateView(APIView):
                     return Response({"detail": "Insufficient balance in wallet."}, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
 class AddFundView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -64,6 +82,7 @@ class AddFundView(APIView):
             amount = request.data.get('amount')
             advertisement = Advertisement.objects.get(id=advertisement_id)
             user_wallet = UserWallet.objects.get(user=request.user)
+
             if user_wallet.balance >= amount:
                 user_wallet.balance -= amount
                 user_wallet.save()
@@ -74,6 +93,34 @@ class AddFundView(APIView):
                                                transaction_type='spend', amount=amount, status='approved')
                 return Response({"detail": "Funds added successfully."}, status=status.HTTP_200_OK)
             return Response({"detail": "Insufficient balance in wallet."}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class AdvertisementListView(generics.ListAPIView):
+    queryset = Advertisement.objects.all()
+    serializer_class = AdvertisementSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+
+class SubmitProofView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        with transaction.atomic():
+            advertisement_id = request.data.get('advertisement_id')
+            proof = request.data.get('proof')
+            advertisement = Advertisement.objects.get(id=advertisement_id)
+            if advertisement.status == 'active' and advertisement.remaining_budget >= advertisement.per_job:
+                UserTransaction.objects.create(
+                    user=request.user,
+                    advertisement=advertisement,
+                    transaction_type='earn',
+                    amount=advertisement.per_job,
+                    status='pending',
+                    proof=proof  # Add proof field to UserTransaction model if necessary
+                )
+                return Response({"detail": "Proof submitted successfully."}, status=status.HTTP_200_OK)
+            return Response({"detail": "Advertisement is not active or insufficient budget."},
+                            status=status.HTTP_400_BAD_REQUEST)
 
 
 class SubmitProofView(APIView):
@@ -135,7 +182,8 @@ class ApproveSubmissionView(APIView):
                     advertisement.status = 'inactive'
                     advertisement.save()
 
-                return Response({"detail": "Submission approved and spend transaction created."}, status=status.HTTP_200_OK)
+                return Response({"detail": "Submission approved and spend transaction created."},
+                                status=status.HTTP_200_OK)
 
         except UserTransaction.DoesNotExist:
             return Response({"detail": "Transaction not found or already approved."},
@@ -143,6 +191,7 @@ class ApproveSubmissionView(APIView):
 
         except Exception as e:
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
 
 # Wallet, Transaction, and Category Views
 
