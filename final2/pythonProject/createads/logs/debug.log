@@ -1,0 +1,25 @@
+2024-07-04 20:48:09,021 - DEBUG - Received POST request data: {'title': 'New Advertisement', 'details': 'This is a test advertisement.', 'discounts': '10% off', 'offers': 'Buy one get one free', 'referral_code': 'ABC123', 'guidelines': 'Please follow the guidelines.', 'links': 'https://example.com', 'duration': '2 days', 'priority': 1}
+2024-07-04 20:48:09,024 - ERROR - Unexpected error: Got a `TypeError` when calling `AdminAdvertisement.objects.create()`. This may be because you have a writable field on the serializer class that is not a valid argument to `AdminAdvertisement.objects.create()`. You may need to make the field read-only, or override the AdminAdvertisementSerializer.create() method to handle this correctly.
+Original exception was:
+ Traceback (most recent call last):
+  File "C:\Users\Asim\final2\pythonProject\.venv\Lib\site-packages\rest_framework\serializers.py", line 989, in create
+    instance = ModelClass._default_manager.create(**validated_data)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Asim\final2\pythonProject\.venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Asim\final2\pythonProject\.venv\Lib\site-packages\django\db\models\query.py", line 679, in create
+    obj.save(force_insert=True, using=self.db)
+  File "C:\Users\Asim\projectadvertise\asim_backend\Project-EH-Backend\Sandbox\django_rest\final2\pythonProject\createads\landingpage\models.py", line 23, in save
+    if self.created_at + self.duration < timezone.now():
+       ~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~
+TypeError: unsupported operand type(s) for +: 'NoneType' and 'datetime.timedelta'
+
+2024-07-04 20:49:24,439 - DEBUG - Received POST request data: {'title': 'New Advertisement', 'details': 'This is a test advertisement.', 'discounts': '10% off', 'offers': 'Buy one get one free', 'referral_code': 'ABC123', 'guidelines': 'Please follow the guidelines.', 'links': 'https://example.com', 'duration': '2 days', 'priority': 1}
+2024-07-04 20:49:24,456 - INFO - Advertisement created successfully.
+2024-07-04 20:50:46,134 - DEBUG - Received POST request data: {'title': 'New Advertisement 1', 'details': 'This is a test advertisement.', 'discounts': '10% off', 'offers': 'Buy one get one free', 'referral_code': 'ABC123', 'guidelines': 'Please follow the guidelines.', 'links': 'https://example.com', 'duration': '2 days', 'priority': 1}
+2024-07-04 20:50:46,139 - INFO - Advertisement created successfully.
+2024-07-04 20:50:50,845 - DEBUG - Received POST request data: {'title': 'New Advertisement 2', 'details': 'This is a test advertisement.', 'discounts': '10% off', 'offers': 'Buy one get one free', 'referral_code': 'ABC123', 'guidelines': 'Please follow the guidelines.', 'links': 'https://example.com', 'duration': '2 days', 'priority': 1}
+2024-07-04 20:50:50,850 - INFO - Advertisement created successfully.
+2024-07-04 20:50:54,462 - DEBUG - Received POST request data: {'title': 'New Advertisement 3', 'details': 'This is a test advertisement.', 'discounts': '10% off', 'offers': 'Buy one get one free', 'referral_code': 'ABC123', 'guidelines': 'Please follow the guidelines.', 'links': 'https://example.com', 'duration': '2 days', 'priority': 1}
+2024-07-04 20:50:54,476 - INFO - Advertisement created successfully.

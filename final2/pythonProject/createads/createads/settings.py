@@ -24,7 +24,7 @@ SECRET_KEY = 'django-insecure-n_g0ujkfn)$&7w62qr^b3ob3@v&m%m%6y@#54_)2j+6@y7o1q6
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -39,9 +39,12 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'create',
     'login',
+    'corsheaders',
+    'landingpage'
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -165,6 +168,13 @@ SIMPLE_JWT = {
     'TOKEN_TYPE_CLAIM': 'token_type',
 }
 
+
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:3001',  # React app URL
+    'http://localhost:3000',  # React app URL
+    'http://localhost:3002',  # React app URL
+
+]
 # LOGGING = {
 #     'version': 1,
 #     'disable_existing_loggers': False,

@@ -11,6 +11,7 @@ from .models import User
 from .serializers import UserSerializer
 from .utils import send_verification_email
 
+
 # logger = logging.getLogger(__name__)
 
 class RegisterView(APIView):
